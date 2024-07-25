@@ -10,8 +10,6 @@ class GamePage(Tk):
             super().__init__()
 
             def submt(var1):
-                print(var1)
-                print(str(resultPLUS()))
                 if var1.get() == str(resultPLUS()):
                     correct = Label(text = 'Correct !', fg='green', font=("Courier", 16))
                     correct.place(relx= 0.3, rely=0.2)
@@ -24,25 +22,25 @@ class GamePage(Tk):
                 try_again.num2update = random.choice(num)
                 question = Label(text = f"{try_again.num1update} + {try_again.num2update}", font=("Courier", 16))
                 question.place(relx=0.16, rely=0.14, relwidth=0.7, relheight = 0.23)
+                solving.delete(0, END)
 
             def resultPLUS():
                 try_again
-
                 return try_again.num1update + try_again.num2update
 
             
             root.title('Mathy')
             root.geometry('925x500+300+200')
-            root.configure(bg="#fff")
+            root.configure(bg="light blue")
             root.resizable(False, False)
-            Label(text="Mathy Game").pack()
+            Label(text="Mathstyle", fg = '#57a1f8', bg='white', font = ('Helvetica', 23, 'bold')).pack()
             num = [1,2,3,4,5,6,7,8,9]
             
 
             start = Button (text="Start", command= try_again)
             start.place(relx = 0.45, rely=2)
             
-            solving = Entry()
+            solving = Entry(root)
             solving.place(relx = 0.35, rely=0.4, relwidth=0.34, relheight = 0.23)
 
             submit = Button(text = "Submit", command=lambda: submt(solving))
