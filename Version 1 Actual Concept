@@ -29,7 +29,7 @@ class GamePage(Tk):
                 return try_again.num1update + try_again.num2update
 
             
-            root.title('Mathy')
+            root.title('Mathstyle')
             root.geometry('925x500+300+200')
             root.configure(bg="light blue")
             root.resizable(False, False)
@@ -46,7 +46,7 @@ class GamePage(Tk):
             submit = Button(text = "Submit", command=lambda: submt(solving))
             submit.place(relx = 0.35, rely=0.64, relwidth=0.34, relheight = 0.23)
 
-            try_again = Button(text = " Please Try Again", command= try_again)
+            try_again = Button(text = " Load Question", command= try_again)
             try_again.place(relx=0.39, rely=0.9)
             mainloop()
 
@@ -54,7 +54,7 @@ class GamePage(Tk):
   #############################################################################################################
 
 
-class enwor(Tk):
+class Login(Tk):
     def __init__(root):
         super().__init__()
 
@@ -175,4 +175,4 @@ class enwor(Tk):
 
 
 if __name__ == "__main__":
-    enwor()
+    Login()
