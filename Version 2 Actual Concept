@@ -61,16 +61,17 @@ class GamePage(Tk):
             submit = Button(text = "Submit", command=lambda: submt(solving))
             submit.place(relx = 0.35, rely=0.64, relwidth=0.34, relheight = 0.23)
 
-            try_again = Button(text = " Load Question", command= try_again)
+            try_again = Button(text = " Load/Next Question", command= try_again)
             try_again.place(relx=0.39, rely=0.9)
+
             mainloop()
 
 class intropage(Tk):
     
     def __init__(self):
         super(). __init__()
-        self.geometry("200x200")
-        self.title("Introduction to Mathstyle")
+        self.geometry("340x200")
+        self.title("Pick a Difficulty")
         frame = Frame(bg = "#ffffff")
         easy = Button(frame, text = "Easy", bg='#ffffff', command = lambda: self.change_page(1)).grid()
         medium = Button(frame, text = "Medium", bg='#ffffff', command = lambda: self.change_page(2)).grid()
@@ -90,7 +91,7 @@ class Login(Tk):
     def __init__(root):
         super().__init__()
 
-        root.title('Swimmer Login Page')
+        root.title('Swimin Page')
         root.geometry('925x500+300+200')
         root.configure(bg="white")
         root.resizable(False, False)
