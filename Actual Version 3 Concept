@@ -6,84 +6,115 @@ import random
 #Math Game Code
 
 class GamePage(Tk):
-
-    derived_question = None
-    answer = None
-
     def __init__(root, difficulty):
             super().__init__()
 
-            def submt(var1):
-                if var1.get() == str(root.answer):
-                    correct = Label(text = 'Correct !', fg='green', font=("Courier", 16))
-                    correct.place(relx= 0.3, rely=0.2)
-                else:
-                    wrong = Label(text = 'Wrong !', fg='red', font=("Courier", 16))
-                    wrong.place(relx= 0.3, rely=0.2)
+            root.answered_already = False
+            score=IntVar()
+            root.time_left = 10
+            root.timer_running = False
             
+            def validate_input(input_str):
+                """Validate the input string to only contain numbers and optional negative signs."""
+                return input_str.lstrip("-").isdigit()
+            
+            def submt(var1):
+                if root.answered_already == False:
+                    user_input = var1.get().strip()
+                    if validate_input(user_input) and int(user_input) == root.answer:
+                        correct=Label(text=' Correct !', fg='green', bg = 'light blue', font=("Helvetica", 16))
+                        correct.place(relx=0.45, rely = 0.2)
+                        score.set(score.get()+1)
+                        root.answered_already = True
+                        root.timer_running = False
+                    else:
+                        wrong=Label(text=' Wrong or Invalid Input !', fg='red', bg = 'light blue', font=("Helvetica", 16))
+                        wrong.place(relx=0.45, rely=0.2)
+                        root.timer_running = False
             def try_again():
-                try_again.num1update = random.randint(0, max_var)
-                try_again.num2update = random.randint(0, max_var)
+                try_again.num1update=random.randint(0, max_var)
+                try_again.num2update=random.randint(0, max_var)
                 if difficulty==1:
                     operation = random.choice(["+"])
                 elif difficulty==2:
-                    operation = random.choice(["+", "-"])
+                    operation=random.choice(["+", "-"])
                 else:
-                    operation = random.choice(["+", "-", "*",])
+                    operation=random.choice(["+", "-", "*",])
 
-                root.derived_question = f"{try_again.num1update} {operation} {try_again.num2update}"
-                root.answer = eval(root.derived_question)
-                question = Label(text = root.derived_question, font=("Courier", 16))
-                question.place(relx=0.16, rely=0.14, relwidth=0.7, relheight = 0.23)
+                root.derived_question=f"{try_again.num1update} {operation} {try_again.num2update}"
+                root.answer=eval(root.derived_question)
+                question=Label(text=root.derived_question, font=("Helvetica", 16), bg= 'light blue')
+                question.place(relx=0.16, rely=0.10, relwidth=0.7, relheight=0.15)
+                root.answered_already = False
                 solving.delete(0, END)
 
+                root.time_left = 10
+                if not root.timer_running:
+                    root.timer_running = True
+                    update_timer()
 
-            
+            def update_timer():
+                if root.time_left > 0:
+                    timer_label.config(text=f"Time Left: {root.time_left} seconds")
+                    root.time_left -= 1
+                    root.after(1000, update_timer)
+                else:
+                    if root.timer_running:
+                        root.timer_running = False   
+                        messagebox.showinfo(f"Times Up, You have ran out of time !")
+                        root.answered_already = True
+                        root.destroy()
+                        intropage()
+
             root.title('Mathstyle')
             root.geometry('925x500+300+200')
             root.configure(bg="light blue")
             root.resizable(False, False)
-            Label(text="Mathstyle", fg = '#57a1f8', bg='white', font = ('Helvetica', 23, 'bold')).pack()
-            
+            Label(text="Mathstyle", fg='#57a1f8', bg='light blue', font=('Helvetica', 23, 'bold')).pack()
             if difficulty ==1:
-                max_var = 10
-            elif difficulty == 2:
-                max_var = 25
+                max_var=10
+            elif difficulty==2:
+                max_var=25
             else:
-                max_var = 50
+                max_var=50
             
 
-            start = Button (text="Start", command= try_again)
-            start.place(relx = 0.45, rely=2)
+            start=Button(text="Start", command=try_again)
+            start.place(relx=0.5, rely=2, anchor="center")
             
-            solving = Entry(root)
-            solving.place(relx = 0.35, rely=0.4, relwidth=0.34, relheight = 0.23)
+            solving=Entry(root)
+            solving.place(relx=0.5, rely=0.4, relwidth=0.34, relheight=0.23, anchor="center")
 
-            submit = Button(text = "Submit", command=lambda: submt(solving))
-            submit.place(relx = 0.35, rely=0.64, relwidth=0.34, relheight = 0.23)
+            submit=Button(text="Submit", font=('Helvetica', 13, 'bold'), command=lambda: submt(solving))
+            submit.place(relx=0.5, rely=0.64, relwidth=0.34, relheight=0.23, anchor="center")
 
-            exit = Button(text = " Exit Game", command= root.destroy)
-            exit.place(relx=0.59, rely=0.9)
+            exit=Button(text=" Exit Game", font=('Helvetica', 13, 'bold'), command=root.destroy)
+            exit.place(relx=0.59, rely=0.9, anchor="center")
 
-            try_again = Button(text = " Load/Next Question", command= try_again)
-            try_again.place(relx=0.39, rely=0.9)
+            score_label=Label(root, textvariable = score, font = ('Helvetica', 13, 'bold'))
+            score_label.place(anchor ="center", relx = 0.63, rely = 0.8)
+
+            timer_label = Label(root, text=f"Time Left: {root.time_left} seconds", font=('Helvetica', 13, 'bold'), bg = 'light blue')
+            timer_label.place(anchor = "center", relx=0.5, rely=0.8)
+            
+
+            try_again=Button(text=" Load/Next Question", font=('Helvetica', 13, 'bold'), command=try_again)
+            try_again.place(relx=0.39, rely=0.9, anchor="center")
 
             mainloop()
-
 class intropage(Tk):
-    
     def __init__(self):
         super(). __init__()
         self.geometry("340x200")
         self.title("Pick a Difficulty")
-        frame = Frame(bg = "#ffffff")
-        easy = Button(frame, text = "Easy", bg='#ffffff', command = lambda: self.change_page(1)).grid()
-        medium = Button(frame, text = "Medium", bg='#ffffff', command = lambda: self.change_page(2)).grid()
-        hard = Button(frame, text = "Hard", bg='#ffffff', command = lambda: self.change_page(3)).grid()
+        frame=Frame(bg="#ffffff")
+        easy=Button(frame, text="Easy", font=('Helvetica', 13, 'bold'), bg = 'light blue', command=lambda: self.change_page(1)).grid()
+        medium=Button(frame, text="Medium", font=('Helvetica', 13, 'bold'), bg = 'light blue', command=lambda: self.change_page(2)).grid()
+        hard=Button(frame, text="Hard", font=('Helvetica', 13, 'bold'), bg = 'light blue', command=lambda: self.change_page(3)).grid()
         frame.pack()
         self.mainloop()
 
-    def change_page(self, diff):
+    def change_page(self,diff):
         self.destroy()
         GamePage(diff)
 
@@ -97,54 +128,70 @@ class Login(Tk):
 
         root.title('Swimin Page')
         root.geometry('925x500+300+200')
-        root.configure(bg="white")
+        root.configure(bg="light blue")
         root.resizable(False, False)
 
         #############################################################################################################
         #Hello Everyone Screen (where the game is going to be)
 
         def signin():
-            username=user.get()
-            password=code.get()
+            username=user.get().strip()
+            password=code.get().strip()
+
+            if not username or not password or username == "Username" or password == "Password":
+                messagebox.showerror("Invalid", "Username and Password cannot be blank")
+                return
+
+            try:
+                with open("users.txt", "r") as file:
+                    users = file.readlines()
+
+                    for user_info in users:
+                        user_info = user_info.strip()
+                        if not user_info or "," not in user_info:
+                            continue
+
+                        saved_username, saved_password = user_info.split(",", 1)
+
+                        if saved_username == username and saved_password == password:
+                            root.destroy()
+                            intropage()
+                            return
+
+                    messagebox.showerror("Invalid", "Invalid Username or Password")
 
 
-            if username=='admin' and password=="1234":
-                root.destroy()
-                intropage()
+            except FileNotFoundError:
+                messagebox.showerror("Invalid", "There are no users that have registered yet.")
 
 
-        ############################################################################################################
-            #Error proofing for password input
-            
-            elif username!= 'admin' and password!='1234':
-                messagebox.showerror("Invalid", "Invalid Username and Password ")
+        def sign_up():
+            username=user.get().strip()
+            password=code.get().strip()
 
+            if not username or not password or username == "Username" or password == "Password":
+                messagebox.showerror("Invalid", "Username and Password cannot be blank")
+                return
 
-            elif password!="1234":
-                messagebox.showerror("Invalid", "Invalid Password ")
-        #############################################################################################################
-            #Error proofing for username input 
-            
-            elif password!= '1234' and username!='admin':
-                messagebox.showerror("Invalid", "Invalid Username and Password ")
-
-
-            elif username!="admin":
-                messagebox.showerror("Invalid", "Invalid Username ")
+            try:
+                with open("users.txt", "a") as file:
+                    file.write(f"{username},{password}\n")
+                messagebox.showinfo("Success", "Account has been succesfully created!")
+            except:
+                messagebox.showerror("Error", "An error has occured while creating the account.")
 
         #############################################################################################################
 
         #Background image, frame and heading for GUI
 
-        img = PhotoImage(file="swimmer.png")
-        Label(root, image=img, bg='white').place(x=50, y=50)
-
-
-        frame= Frame(root, width=350, height=350, bg="white")
+        img=PhotoImage(file="swimmer.png")
+        Label(root, image = img, bg ='light blue').place(x=50, y=50)
+        
+        frame=Frame(root, width=350, height=350, bg="light blue")
         frame.place(x=480, y=70)
 
 
-        heading = Label(frame, text = 'Sign In', fg = '#57a1f8', bg='white', font = ('Helvetica', 23, 'bold') )
+        heading=Label(frame, text='Sign In', fg='#57a1f8', bg='light blue', font=('Helvetica', 23, 'bold') )
         heading.place(x=100, y=5)
 
         ##################################################################################################################
@@ -156,18 +203,18 @@ class Login(Tk):
 
         def on_leave(e):
             name=user.get()
-            if name == '':
+            if name=='':
                 user.insert(0, 'Username')
 
 
-        user = Entry(frame, width=25, fg= 'black', border = 0, bg= "white", font = ('Helvetica', 11) )
+        user=Entry(frame, width=25, fg= 'black', border=0, bg="light blue", font=('Helvetica', 11) )
         user.place(x=30, y=80)
         user.insert(0, 'Username')
         user.bind('<FocusIn>', on_enter)
         user.bind('<FocusOut>', on_leave)
 
 
-        Frame(frame, width = 295, height=2, bg='black').place(x=25,y=107)
+        Frame(frame, width=295, height=2, bg='black').place(x=25,y=107)
 
 
         ###########################################################################################################
@@ -183,14 +230,14 @@ class Login(Tk):
                 code.insert(0, 'Password')
 
 
-        code = Entry(frame, width=25, fg= 'black', border = 0, bg= "white", font = ('Helvetica', 11) )
+        code=Entry(frame, width=25, fg='black', border=0, bg="light blue", font =('Helvetica', 11) )
         code.place(x=30, y=150)
         code.insert(0, 'Password')
         code.bind('<FocusIn>', on_enter)
         code.bind('<FocusOut>', on_leave)
 
 
-        Frame(frame, width = 295, height=2, bg='black').place(x=25,y=177)
+        Frame(frame, width=295, height=2, bg='black').place(x=25,y=177)
 
 
         ###########################################################################################################
@@ -199,18 +246,13 @@ class Login(Tk):
 
         Button(frame, width=39, pady=7, text='Sign In', bg='#57a1f8', fg='white', font=('Helvetica', 9), border=0, command=signin).place(x=35, y=204)
         
-        label = Label(frame, text="Don't have an account?", fg='black', bg='white', font=('Helvetica', 9))
+        label=Label(frame, text="Don't have an account?", fg='black', bg='light blue', font=('Helvetica', 9))
         label.place(x=75, y=270)
 
-
-        sign_up = Button(frame, width=6, text='Sign Up', border=0, bg='white', cursor='hand2', fg='#57a1f8')
-        sign_up.place(x=215, y=270)
-
-
-
+        sign_up=Button(frame, width=6, text='Sign Up', border=0, bg='light blue', cursor='hand2', fg='#57a1f8', command = sign_up).place(x=215, y=270)
 
         root.mainloop()
 
 
-if __name__ == "__main__":
+if __name__=="__main__":
     Login()
