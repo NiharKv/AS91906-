@@ -17,12 +17,17 @@ class GamePage(Tk):
             def submt(var1):
                 if root.answered_already == False:
                     user_input = var1.get().strip()
+
+                    user_input_value = None
                     
-                    if not user_input.isdigit():
+                    try:
+                        user_input_value = int(user_input)
+                    except ValueError:
                         submit_label.config(text=' Invalid Input ! Please enter a number', fg='red', bg = 'light blue', font=("Helvetica", 16))
                         submit_label.place(relx = 0.97, anchor = "e")
+                        return
                     
-                    elif int(user_input) == root.answer:
+                    if user_input_value == root.answer:
                         submit_label.config(text=' Correct !', fg='green', bg = 'light blue', font=("Helvetica", 16))
                         submit_label.place(relx = 0.83, anchor = "e")
                         score.set(score.get()+1)
@@ -45,8 +50,7 @@ class GamePage(Tk):
 
                 root.derived_question=f"{num1} {operation} {num2}"
                 root.answer=eval(root.derived_question)
-                math_question=Label(text=root.derived_question, font=("Helvetica", 16), bg= 'light blue')
-                math_question.place(relx = 0.81, rely=0.15, anchor = "e")
+                math_question.config(text=root.derived_question, font=("Helvetica", 16), bg= 'light blue')
                 root.answered_already = False
                 solving.delete(0, END)
 
@@ -99,6 +103,9 @@ class GamePage(Tk):
             
             submit_label = Label(text=' ', fg='red', bg = 'light blue', font=("Helvetica", 16))
             submit_label.place(relx=0.95, rely=0.2, anchor = "e") 
+
+            math_question = Label(root, text= "", font=("Helvetica", 16), bg="light blue")
+            math_question.place(relx=0.81, rely=0.15, anchor = "e")
 
             load_question_button=Button(text=" Load/Next Question", font=('Helvetica', 13, 'bold'), command=load_new_question)
             load_question_button.place(relx=0.80, rely=0.9, anchor="e")
