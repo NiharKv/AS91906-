@@ -45,8 +45,8 @@ class GamePage(Tk):
 
                 root.derived_question=f"{num1} {operation} {num2}"
                 root.answer=eval(root.derived_question)
-                question=Label(text=root.derived_question, font=("Helvetica", 16), bg= 'light blue')
-                question.place(relx = 0.81, rely=0.15, anchor = "e")
+                math_question=Label(text=root.derived_question, font=("Helvetica", 16), bg= 'light blue')
+                math_question.place(relx = 0.81, rely=0.15, anchor = "e")
                 root.answered_already = False
                 solving.delete(0, END)
 
@@ -85,11 +85,11 @@ class GamePage(Tk):
             solving=Entry(root)
             solving.place(relx=0.95, rely=0.4, relwidth=0.34, relheight=0.23, anchor="e")
 
-            submit=Button(text="Submit", font=('Helvetica', 13, 'bold'), command=lambda: submt(solving))
-            submit.place(relx=0.95, rely=0.64, relwidth=0.34, relheight=0.23, anchor="e")
+            submit_button=Button(text="Submit", font=('Helvetica', 13, 'bold'), command=lambda: submt(solving))
+            submit_button.place(relx=0.95, rely=0.64, relwidth=0.34, relheight=0.23, anchor="e")
 
-            exit=Button(text=" Exit Game", font=('Helvetica', 13, 'bold'), command=root.destroy)
-            exit.place(relx=0.95, rely=0.9, anchor="e")
+            exit_button=Button(text=" Exit Game", font=('Helvetica', 13, 'bold'), command=root.destroy)
+            exit_button.place(relx=0.95, rely=0.9, anchor="e")
 
             score_label=Label(root, textvariable = score, font = ('Helvetica', 13, 'bold'))
             score_label.place(anchor ="e", relx = 0.95, rely = 0.8)
@@ -138,17 +138,20 @@ class Login(Tk):
         #############################################################################################################
         #Hello Everyone Screen (where the game is going to be)
 
-        def signin():
-            username=user.get().strip()
-            password=code.get().strip()
+        def sign_in():
+            login_username=user.get().strip()
+            login_password=code.get().strip()
 
-            if not username or not password or username == "Username" or password == "Password":
+            if not login_username or not login_password or login_username == "Username" or login_password == "Password":
                 messagebox.showerror("Invalid", "Username and Password cannot be blank")
                 return
 
             try:
                 with open("users.txt", "r") as file:
                     users = file.readlines()
+                    
+                    user_found = False
+                    password_correct = False
 
                     for user_info in users:
                         user_info = user_info.strip()
@@ -157,29 +160,39 @@ class Login(Tk):
 
                         saved_username, saved_password = user_info.split(",", 1)
 
-                        if saved_username == username and saved_password == password:
+                        if saved_username.strip() == login_username:
+                            user_found = True
+                            if saved_password.strip() == login_password:
+                                password_correct = True
+                                break
+                            else:
+                                break
+                    
+                    if user_found:
+                        if password_correct:
                             root.destroy()
                             intropage()
-                            return
+                        else:    
+                            messagebox.showerror("Invalid", "Invalid Password")
+                    else:
+                        messagebox.showerror("Invalid", "Invalid Username")
 
-                    messagebox.showerror("Invalid", "Invalid Username or Password")
 
-
-            except FileNotFoundError:
-                messagebox.showerror("Invalid", "There are no users that have registered yet.")
+            except Exception as e:
+                messagebox.showerror("Error", f"An error has occured: {e}")
 
 
         def sign_up():
-            username=user.get().strip()
-            password=code.get().strip()
+            login_username=user.get().strip()
+            login_password=code.get().strip()
 
-            if not username or not password or username == "Username" or password == "Password":
+            if not login_username or not login_password or login_username == "Username" or login_password == "Password":
                 messagebox.showerror("Invalid", "Username and Password cannot be blank")
                 return
 
             try:
                 with open("users.txt", "a") as file:
-                    file.write(f"{username},{password}\n")
+                    file.write(f"{login_username},{login_password}\n")
                 messagebox.showinfo("Success", "Account has been succesfully created!")
             except:
                 messagebox.showerror("Error", "An error has occured while creating the account.")
@@ -248,12 +261,14 @@ class Login(Tk):
 
         #Buttons
 
-        Button(frame, width=39, pady=7, text='Sign In', bg='#57a1f8', fg='white', font=('Helvetica', 9), border=0, command=signin).place(x=35, y=204)
+        sign_in_button = Button(frame, width=39, pady=7, text='Sign In', bg='#57a1f8', fg='white', font=('Helvetica', 9), border=0, command=sign_in)
+        sign_in_button.place(x=35, y=204)
         
-        label=Label(frame, text="Don't have an account?", fg='black', bg='light blue', font=('Helvetica', 9))
-        label.place(x=75, y=270)
+        dont_have_an_account_label=Label(frame, text="Don't have an account?", fg='black', bg='light blue', font=('Helvetica', 9))
+        dont_have_an_account_label.place(x=75, y=270)
 
-        sign_up=Button(frame, width=6, text='Sign Up', border=0, bg='light blue', cursor='hand2', fg='#57a1f8', command = sign_up).place(x=215, y=270)
+        sign_up_button=Button(frame, width=6, text='Sign Up', border=0, bg='light blue', cursor='hand2', fg='#57a1f8', command = sign_up)
+        sign_up_button.place(x=215, y=270)
 
         instructions_l = (
             "1) Type in your preferred username and password\n"
