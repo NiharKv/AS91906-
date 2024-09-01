@@ -1,1 +1,309 @@
+from tkinter import * #Import the neccessary modules from the tkinter library for the GUI
+from tkinter import messagebox
+import random #Import the random module to generate random numbers 
 
+#############################################################################################################
+#Math Game Code
+
+class GamePage(Tk): #Define the GamePage class, which is derived from Tk (the main window class in Tkinter) 
+    def __init__(root, difficulty):
+            super().__init__() #Intiatlise the parent class being Tk
+
+            root.answered_already = False #Checks if the question has already been answered
+            score=IntVar() #Variable to keep track of the score using IntVar
+            root.time_left = 10 #Set the intital time left for answering the question
+            root.timer_running = False #Indicates if the timer is running 
+            root.frame = 0
+            root.frame_image = PhotoImage(file="swimgif.gif", format="gif -index " + str(root.frame))
+            
+            def submt(var1): #Function to sumbit the user's answer and to validate it
+                if root.answered_already == False: #Checks if the question has not already been answered
+                    user_input = var1.get().strip() #Gets and strips any leading or trialing spaces from the user input
+
+                    user_input_value = None  #Intialise a variable to store the parsed user input
+                    
+                    try:
+                        user_input_value = int(user_input) #Try to convert user input into a integer
+                    except ValueError: #Handle the case where the input is not a valid integer
+                        submit_label.config(text=' Invalid Input ! Please enter a number', fg='red', bg = 'light blue', font=("Helvetica", 16)) #Update the label using config to show an error
+                        submit_label.place(relx = 0.99, anchor = "e") #Place the submit label on the screen
+                        return 
+                    
+                    if user_input_value == root.answer: #Check if the user input matches the correct answer 
+                        submit_label.config(text=' Correct !', fg='green', bg = 'light blue', font=("Helvetica", 16)) #Update the label to show an message telling the user their answer is Correct
+                        submit_label.place(relx = 0.83, anchor = "e")#Place the submit label on the screen
+                        score.set(score.get()+1) #Increment the score by 1
+                        swim_gif() #Run gif
+                        root.answered_already = True #Mark the question as answered
+                        root.timer_running = False #Stop the timer
+                    else:
+                        submit_label.config(text=' Incorrect', fg='red', bg = 'light blue', font=("Helvetica", 16)) #Update the label to show an message telling the user their answer is Incorrect
+                        submit_label.place(relx = 0.83, anchor = "e") #Place the submit label on the screen
+                        root.timer_running = False #Stop the timer
+
+            def load_new_question(): #Function to generate and load a new math question
+                num1=random.randint(0, max_var) #Generate a random number for the first operand (mumber)
+                num2=random.randint(0, max_var) #Generate a random number for the second operand (mumber)
+                if difficulty==1: #If the difficulty is 1 (Easy)
+                    operation = random.choice(["+"]) #Only use addition
+                elif difficulty==2: #If the difficulty is 2 (Medium)
+                    operation=random.choice(["+", "-"]) #Use addition or subtraction
+                else: #If difficulty is 3 (Hard)
+                    operation=random.choice(["+", "-", "*",]) #Use addition, subtraction, or multiplication
+
+                root.derived_question=f"{num1} {operation} {num2}" #Formulate the math question
+                root.answer=eval(root.derived_question) #Evaluate the math question to get the correct answer
+                math_question.config(text=root.derived_question, font=("Helvetica", 16), bg= 'light blue') #Update the question label with the new question
+                root.answered_already = False #Reset the answered_already variable
+                solving.delete(0, END) #Clear the entry widget(input) for a new answer
+
+                submit_label.config(text = "") #Clear any previous feedback messages
+
+                root.time_left = 10 #Reset the timer to 10 seconds
+                if not root.timer_running: #If the timer is not already running 
+                    root.timer_running = True #Start the timer
+                    update_timer() #Call the update_timer function to update the timer
+
+            def update_timer(): #Function to update the countdown timer
+                if root.timer_running: #If the timer was running
+                    if root.time_left > 0: #If there is still time left (greater than zero)
+                        timer_label.config(text=f"Time Left: {root.time_left} seconds") #Update the timer label
+                        root.time_left -= 1 #Decrement the time left by 1 second
+                        root.after(1000, update_timer) #Call this function again after 1 second
+                    else: #If time is up
+                        root.timer_running = False #Stop the timer
+                        messagebox.showinfo(message=f"Times Up, You have ran out of time !") #Show a messagebox indicating time is up, and the user has ran out of time
+                        root.answered_already = True #Mark the question as answered
+                        root.destroy() #Close the game window
+                        intropage() #Go back to the intro page
+
+            def swim_gif(): #Function to display and loop through frames of a GIF
+                try: 
+                    root.frame_image = PhotoImage(file="swimgif.gif", format="gif -index " + str(root.frame)) #Load a specific frame of the GIF file "swimgif.gif" based on the current frame number
+                    gif_frame.create_image(0,0, anchor="nw", image=root.frame_image) #Display the current frame image on the canvas or label (named gif_frame) at the top left hand corner
+                    root.frame += 1 #Increment the frame number by 1 to load the next frame in the sequence
+                    root.after(10, swim_gif) #Set a delay of 10 milliseconds before calling the swim_gif function again to load the next frame
+                except Exception:
+                    root.frame = 0 #If an error occurs, for example when reaching the last frame, reset the frame number to 0 to start over
+
+            root.title('Mathstyle') #Set the window title
+            root.geometry('925x500+300+200') #Set the window size and position (geometry)
+            root.configure(bg="light blue") #Set the background  colour to light blue
+            root.resizable(False, False) #Disable the window resizing
+            Label(text="Mathstyle", fg='#57a1f8', bg='light blue', font=('Helvetica', 23, 'bold')).place(relx = 0.86, rely=0.04, anchor = "e") #Display the game title
+            if difficulty ==1: #If the difficulty is easy
+                max_var=10 #Set the maximum random number to 10
+            elif difficulty==2: #If the difficulty is medium
+                max_var=25 #Set the maximum random number to 25
+            else: #If the difficulty is hard
+                max_var=50 #Set the maximum random number to 50
+            
+            solving=Entry(root) #Create an entry widget for user input
+            solving.place(relx=0.95, rely=0.4, relwidth=0.34, relheight=0.23, anchor="e") #Place the entry widget on the screen
+
+            submit_button=Button(text="Submit", font=('Helvetica', 13, 'bold'), command=lambda: submt(solving)) #Create submit button with a command to call the submt function 
+            submit_button.place(relx=0.95, rely=0.64, relwidth=0.34, relheight=0.23, anchor="e") #Place the sumbit button on the screen 
+
+            exit_button=Button(text=" Exit Game", font=('Helvetica', 13, 'bold'), command=root.destroy) #Create an exit button to close the window
+            exit_button.place(relx=0.95, rely=0.9, anchor="e") #Place the exit button the screen 
+
+            score_label=Label(root, textvariable = score, font = ('Helvetica', 13, 'bold')) #Create a label to display the users game score
+            score_label.place(anchor ="e", relx = 0.95, rely = 0.8) #Place the score label on the screen
+
+            timer_label = Label(root, text=f"Time Left: {root.time_left} seconds", font=('Helvetica', 13, 'bold'), bg = 'light blue') #Create a label to display the timer 
+            timer_label.place(anchor = "e", relx=0.85, rely=0.8) #Place the timer label on the screen 
+            
+            submit_label = Label(text=' ', fg='red', bg = 'light blue', font=("Helvetica", 16)) #Create a label for feedback messages
+            submit_label.place(relx=0.95, rely=0.2, anchor = "e")  #Place the feedback label on the screen 
+
+            math_question = Label(root, text= "", font=("Helvetica", 16), bg="light blue") #Create a label to display the math question
+            math_question.place(relx=0.81, rely=0.15, anchor = "e") #Place the math question label on the screen 
+
+            gif_frame = Canvas(root, width=550, height=300) #Create a Canvas to display the GIF
+            gif_frame.place(x=10, rely=0.5, anchor="w") #Position the canvas on the window and make it vertically centered 
+            gif_frame.create_image(0,0, anchor="nw", image=root.frame_image) #Display the intital frame of the GIF on the canvas, positioning it at the top left hand corner
+
+            load_question_button=Button(text=" Load/Next Question", font=('Helvetica', 13, 'bold'), command=load_new_question) #Create a button to load the next questionm with a command to call the load_new_question function
+            load_question_button.place(relx=0.80, rely=0.9, anchor="e") #Place the load question button the screen
+            
+            load_new_question() #Load the first question when the game starts
+
+            mainloop() #Start the tkinter main event loop
+class intropage(Tk): #Define the intropage class that is derived from Tk
+    def __init__(self): #Intialise the intropage class
+        super(). __init__() #Call the constructor of the Tk class
+        self.geometry("340x200") #Set the window size (geometry)
+        self.title("Pick a Difficulty") #Set the window title
+        frame=Frame(bg="#ffffff") #Create a frame for the buttons
+        easy=Button(frame, text="Easy", font=('Helvetica', 13, 'bold'), bg = 'light blue', command=lambda: self.change_page(1)).grid() #Button for Easy difficulty 
+        medium=Button(frame, text="Medium", font=('Helvetica', 13, 'bold'), bg = 'light blue', command=lambda: self.change_page(2)).grid() #Button for Medium difficulty 
+        hard=Button(frame, text="Hard", font=('Helvetica', 13, 'bold'), bg = 'light blue', command=lambda: self.change_page(3)).grid() #Button for Hard difficulty 
+        frame.pack() #Pack the frame into the window
+        self.mainloop() #Start the Tkinter main event loop
+
+    def change_page(self,diff): #Function to change the page to the GamePage based on the users selected difficulty
+        self.destroy() #Close the current window
+        GamePage(diff) #Open the gamepage with the selected difficulty
+
+
+  #############################################################################################################
+
+
+class Login(Tk): #Define the login class that is derived from TK
+    def __init__(root): #Initialise the login class
+        super().__init__() #Call the constructor of the Tk class
+
+        root.title('Swimin Page') #Set the window title
+        root.geometry('925x500+300+200') #Set the window size and positon (geometry)
+        root.configure(bg="light blue") #Set the background colour to light blue
+        root.resizable(False, False) #Disable the window resizing
+
+        #############################################################################################################
+        #Hello Everyone Screen (where the game is going to be)
+
+        def sign_in(): #Function to handle user sign in
+            login_username=user.get().strip() #Get and strip the username from the Entry widget
+            login_password=code.get().strip() #Get and strip the password from the Entry widget
+
+            if not login_username or not login_password or login_username == "Username" or login_password == "Password": #Check for empty or default inputs 
+                messagebox.showerror("Invalid", "Username and Password is Invalid") #Show an error message if the username or password is invalid, for example symbols
+                return
+
+            try:
+                with open("users.txt", "r") as file: #Open the users.txt file in read mode
+                    users = file.readlines() #Read all lines from the file
+                    
+                    user_found = False #Check if the user is found
+                    password_correct = False #Check if the password is correct
+
+                    for user_info in users: #Iterate through each line in the file
+                        user_info = user_info.strip() #Strip any whitespace
+                        if not user_info or "," not in user_info: #Skip empty lines or invalid entries
+                            continue
+
+                        saved_username, saved_password = user_info.split(",", 1) #Split the username and password
+
+                        if saved_username.strip() == login_username: #If the username matches
+                            user_found = True #Set the user_found to True
+                            if saved_password.strip() == login_password: #If the password matches
+                                password_correct = True #Set the password_correct to True
+                                break #Exit the loop 
+                            else:
+                                break #Exit the loop 
+                    
+                    if user_found: #If the user was found
+                        if password_correct: #If the password was correct
+                            root.destroy() #Close the current window
+                            intropage() #Open the intropage
+                        else:    
+                            messagebox.showerror("Invalid", "Invalid Password") #Show an error message telling the user their password is invalid  
+                    else:
+                        messagebox.showerror("Invalid", "Invalid Username") #Show an error message telling the user their username is invalid 
+
+
+            except Exception as e: #Handle an exceptions
+                messagebox.showerror("Error", f"An error has occured: {e}") #Show an error message 
+
+
+        def sign_up(): #Function to handle the sign up 
+            login_username=user.get().strip() #Get and strip the username from the Entry widget
+            login_password=code.get().strip() #Get and strip the password from the Entry widget
+
+            if not login_username or not login_password or login_username == "Username" or login_password == "Password": #Check for empty or default inputs 
+                messagebox.showerror("Invalid", "Username and Password is Invalid") #Show an error message if the username or password is invalid, for example symbols
+                return
+
+            try:
+                with open("users.txt", "a") as file: #Open the users.txt file in append mode
+                    file.write(f"{login_username},{login_password}\n") #Write the username and password to the text file
+                messagebox.showinfo("Success", "Account has been succesfully created!") #Show an message telling the user their account has been successfully created
+            except:
+                messagebox.showerror("Error", "An error has occured while creating the account.") #Show a message telling the user an error has occured while creating their account    
+
+        #############################################################################################################
+
+        #Background image, frame and heading for GUI
+
+        img=PhotoImage(file="swimmer.png") #Load a background image of a swimmer
+        Label(root, image = img, bg ='light blue').place(x=50, y=50) #Place the image of the swimmer on the screen
+        
+        frame=Frame(root, width=350, height=350, bg="light blue")#Create a frame for the login form
+        frame.place(x=480, y=70) #Place the frame on the screen
+
+
+        heading=Label(frame, text='Sign In', fg='#57a1f8', bg='light blue', font=('Helvetica', 23, 'bold') ) #Create a heading label for the sign in form
+        heading.place(x=100, y=5) #Place the heading label on the screen
+
+        ##################################################################################################################
+        #Placement for the Username textbox
+
+        def on_enter(e): #Function to clear the default text when the entry gains focus
+            user.delete(0, 'end') #Delete the current text in the Entry widget
+
+
+        def on_leave(e): #Function to restore the default text when the entry is left empty
+            name=user.get() #Get the current text from the Entry widget
+            if name=='': #Check if the text is empty
+                user.insert(0, 'Username') #Insert the default text "Username" if the field is empty
+
+
+        user=Entry(frame, width=25, fg= 'black', border=0, bg="light blue", font=('Helvetica', 11) ) #Create an entry widget for the username input
+        user.place(x=30, y=80) #Place the username entry on the screen
+        user.insert(0, 'Username') #Insert the default text "Username" into the Entry widget
+        user.bind('<FocusIn>', on_enter) #Bind the focus-in event to the on_enter function to clear the text when the widget gains focus
+        user.bind('<FocusOut>', on_leave) #Bind the focus-in event to the on_leave function to restore the text if left empty
+
+
+        Frame(frame, width=295, height=2, bg='black').place(x=25,y=107) #Create an place a frame with the background colour being black below the username Entry widget 
+
+
+        ###########################################################################################################
+        #Placement for the Password textbox
+
+        def on_enter(e): #Function to clear the default text when the entry gains focus
+            code.delete(0, 'end') #Delete the current text in the Entry widget
+
+
+        def on_leave(e): #Function to restore the default text when the entry is left empty
+            name=code.get() #Get the current text from the Entry widget
+            if name== '': #Check if the text is empty
+                code.insert(0, 'Password') #Insert the default text "Password" if the field is empty
+
+
+        code=Entry(frame, width=25, fg='black', border=0, bg="light blue", font =('Helvetica', 11) ) #Create an entry widget for the password input
+        code.place(x=30, y=150) #Place the password entry on the screen
+        code.insert(0, 'Password') #Insert the default text "Password" into the Entry widget
+        code.bind('<FocusIn>', on_enter) #Bind the focus-in event to the on_enter function to clear the text when the widget gains focus
+        code.bind('<FocusOut>', on_leave) #Bind the focus-in event to the on_leave function to restore the text if left empty
+
+
+        Frame(frame, width=295, height=2, bg='black').place(x=25,y=177) #Create an place a frame with the background colour being black below the username Entry widget 
+
+
+        ###########################################################################################################
+
+        #Buttons
+
+        sign_in_button = Button(frame, width=39, pady=7, text='Sign In', bg='#57a1f8', fg='white', font=('Helvetica', 9), border=0, command=sign_in) #Create a sign in button for the user with the command sign_in
+        sign_in_button.place(x=35, y=204) #Place the sign in button on the screen
+        
+        dont_have_an_account_label=Label(frame, text="Don't have an account?", fg='black', bg='light blue', font=('Helvetica', 9)) #Create a label asking if the user does not have an account
+        dont_have_an_account_label.place(x=75, y=270) #Place the label asking if the user does not have an account on the screen
+
+        sign_up_button=Button(frame, width=6, text='Sign Up', border=0, bg='light blue', cursor='hand2', fg='#57a1f8', command = sign_up) #Create a sign up button for the user with the command sign_up
+        sign_up_button.place(x=215, y=270) #Place the sign up button on the screen
+
+        instructions_l = ( #Create a multi line string variable containing instructions for the user to follow in order to sign up
+            "1) Type in your preferred username and password\n"
+            "2) Click the sign-up button; if done correctly, a message should pop up saying \"Success, Account has been successfully created!\"\n"
+            "3) Once your account has been created, exit the program using the (X) button at the top right-hand corner\n"
+            "4) Run the program again, sign in, and enjoy the game! "
+        )
+        Label(root, text=instructions_l, fg='black', bg='light blue', font=('Helvetica', 9), justify=LEFT).place(x=90, y=400) #Place the instruction label for the user to follow in order to sign up on the screen 
+
+
+        root.mainloop() #Start the Tkinter main event loop
+
+
+if __name__=="__main__": #Check if this is the main script being run
+    Login() #Start the login process by creating an instance of the Login class
