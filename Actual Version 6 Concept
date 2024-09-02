@@ -1,6 +1,7 @@
 from tkinter import * #Import the neccessary modules from the tkinter library for the GUI
 from tkinter import messagebox
 import random #Import the random module to generate random numbers 
+import os 
 
 #############################################################################################################
 #Math Game Code
